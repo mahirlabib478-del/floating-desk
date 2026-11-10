@@ -1,0 +1,49 @@
+name: Android APK
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build installable Android APK
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Install EAS CLI
+        run: npm install --global eas-cli
+
+      - name: Build APK with Expo EAS
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: |
+          if [ -z "$EXPO_TOKEN" ]; then
+            echo "Missing EXPO_TOKEN. Add it in GitHub repository Settings > Secrets and variables > Actions."
+            exit 1
+          fi
+          eas build --platform android --profile preview --non-interactive --wait --json > eas-build.json
+          BUILD_URL="$(jq -r 'if type == "array" then .[0].artifacts.buildUrl else .artifacts.buildUrl end' eas-build.json)"
+          if [ -z "$BUILD_URL" ] || [ "$BUILD_URL" = "null" ]; then
+            echo "Could not find the APK download URL in the EAS build response."
+            cat eas-build.json
+            exit 1
+          fi
+          curl --fail --location "$BUILD_URL" --output Floating-Desk.apk
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Floating-Desk-Android-APK
+          path: Floating-Desk.apk
+          if-no-files-found: error
+          retention-days: 14
