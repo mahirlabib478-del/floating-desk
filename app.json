@@ -1,0 +1,16 @@
+{
+  "expo": {
+    "name": "Floating Desk",
+    "slug": "floating-desk",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "newArchEnabled": true,
+    "android": {
+      "package": "com.mahirlabib.floatingdesk",
+      "adaptiveIcon": {
+        "backgroundColor": "#10131D"
+      }
+    }
+  }
+}
